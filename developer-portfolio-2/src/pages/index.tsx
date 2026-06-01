@@ -59,6 +59,12 @@ const projects = [
     href: "https://www.wrona.com/",
   },
   {
+    title: "Teacher Profile Manager",
+    description: "Web application for managing school teacher profiles with HTML, CSS, PHP & MySQL",
+    image: "/assets/logo.webp",
+    href: "https://github.com/sefu-creater/teacher-profile",
+  },
+  {
     title: "This website",
     description: "My personal website",
     image: "/assets/portfolio.webm",
