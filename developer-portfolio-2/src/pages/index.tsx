@@ -1,21 +1,22 @@
 import Container from "@/components/Container";
-import { useEffect, useRef, Suspense, useState } from "react";
+import { useEffect, useRef, useState, type FocusEvent } from "react";
 import styles from "@/styles/Home.module.css";
 import { Button } from "@/components/ui/button";
 import {
   ChevronRight,
   Code2,
+  ExternalLink,
   Frame,
+  Github,
   SearchCheck,
   Eye,
   MonitorSmartphone,
 } from "lucide-react";
 import { TriangleDownIcon } from "@radix-ui/react-icons";
-import Spline from "@splinetool/react-spline";
 import Link from "next/link";
 import { cn, scrollTo } from "@/lib/utils";
 import Image from "next/image";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
 import {
   Carousel,
   CarouselContent,
@@ -24,8 +25,6 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import VanillaTilt from "vanilla-tilt";
-import { motion } from "framer-motion";
 
 const aboutStats = [
   { label: "Years of experience", value: "3+" },
@@ -33,42 +32,129 @@ const aboutStats = [
   { label: "Companies worked with", value: "15+" },
 ];
 
-const projects = [
+type Skill = {
+  name: string;
+  level: string;
+  progress: number;
+  icon: string;
+};
+
+type SkillGroup = {
+  title: string;
+  skills: Skill[];
+};
+
+type Project = {
+  title: string;
+  badge: string;
+  description: string;
+  href: string;
+  actionLabel?: string;
+  demoHref?: string;
+  sourceHref?: string;
+  media?: string;
+  mockup?: "resume" | "java" | "sales" | "teacher";
+};
+
+const skillGroups: SkillGroup[] = [
   {
-    title: "Unqueue",
-    description: "E-commerce platform for selling digital products",
-    image: "/assets/unqueue.webm",
-    href: "https://unqueue.shop/",
+    title: "Languages",
+    skills: [
+      { name: "HTML", level: "Expert", progress: 100, icon: "H5" },
+      { name: "CSS", level: "Expert", progress: 100, icon: "C3" },
+      { name: "JavaScript", level: "Advanced", progress: 90, icon: "JS" },
+      { name: "TypeScript", level: "Advanced", progress: 90, icon: "TS" },
+      { name: "Java", level: "Intermediate", progress: 70, icon: "JV" },
+    ],
   },
   {
-    title: "InfiniteVPS",
-    description: "High performance VPS hosting solution",
-    image: "/assets/infinitevps.webm",
-    href: "#",
+    title: "Frameworks & Libraries",
+    skills: [
+      { name: "React (Js & Ts)", level: "Advanced", progress: 90, icon: "R" },
+      { name: "Vue (Js & Ts)", level: "Advanced", progress: 90, icon: "V" },
+      { name: "Angular", level: "Beginner", progress: 50, icon: "A" },
+      { name: "React Native", level: "Advanced", progress: 90, icon: "RN" },
+      { name: "Node.js", level: "Intermediate", progress: 70, icon: "N" },
+    ],
   },
   {
-    title: "TranslateBot",
-    description: "Powerful Multilingual Translation Bot for Discord",
-    image: "/assets/translate_bot.webm",
+    title: "State Management",
+    skills: [
+      { name: "Redux Toolkit", level: "Advanced", progress: 90, icon: "RT" },
+      { name: "Pinia", level: "Advanced", progress: 90, icon: "P" },
+      { name: "Zustand", level: "Intermediate", progress: 80, icon: "Z" },
+    ],
+  },
+  {
+    title: "APIs",
+    skills: [
+      { name: "GraphQL (Apollo)", level: "Intermediate", progress: 80, icon: "GQ" },
+      { name: "REST API", level: "Advanced", progress: 90, icon: "API" },
+    ],
+  },
+  {
+    title: "Database & ORM",
+    skills: [
+      { name: "MongoDB", level: "Beginner", progress: 50, icon: "DB" },
+      { name: "Mongoose", level: "Beginner", progress: 50, icon: "MG" },
+    ],
+  },
+];
+
+const projects: Project[] = [
+  {
+    title: "SmartChat",
+    badge: "React Project",
+    description:
+      "A smart AI-powered chatbot interface built with React, enabling interactive communication using modern UI components.",
+    media: "/assets/translate_bot.webm",
     href: "https://translatebot.app/",
+    demoHref: "https://translatebot.app/",
   },
   {
-    title: "Wrona",
-    description: "Robotics-focused technology company",
-    image: "/assets/wrona.jpeg",
-    href: "https://www.wrona.com/",
+    title: "E-shop",
+    badge: "React Project",
+    description:
+      "A modern e-commerce web app for browsing and purchasing products, featuring product pages, cart functionality, and a responsive design.",
+    media: "/assets/unqueue.webm",
+    href: "https://unqueue.shop/",
+    demoHref: "https://unqueue.shop/",
+  },
+  {
+    title: "Resume Builder",
+    badge: "React Project",
+    description:
+      "A React-based web app that allows users to easily create, preview, and download professional resumes with a clean and intuitive interface.",
+    mockup: "resume",
+    href: "#contact",
+    actionLabel: "View Project",
+  },
+  {
+    title: "Java Servlet App",
+    badge: "Java Project",
+    description:
+      "A Java servlet project for practicing server-side web development with servlet request and response handling.",
+    mockup: "java",
+    href: "https://github.com/jabo-arnold-landry/test-java-serlvlet",
+    sourceHref: "https://github.com/jabo-arnold-landry/test-java-serlvlet",
+  },
+  {
+    title: "Sales Order",
+    badge: "Java Project",
+    description:
+      "A sales order management project built in Java for organizing customer orders, products, and sales workflow.",
+    mockup: "sales",
+    href: "https://github.com/sefu-creater/sales-order",
+    sourceHref: "https://github.com/sefu-creater/sales-order",
   },
   {
     title: "Teacher Profile Manager",
-    description: "Web application for managing school teacher profiles with HTML, CSS, PHP & MySQL",
-    image: "/assets/logo.webp",
+    badge: "PHP Project",
+    description:
+      "A simple web application for school administrators to add, view, and manage teacher profiles and qualifications.",
+    mockup: "teacher",
     href: "https://github.com/sefu-creater/teacher-profile",
-  },
-  {
-    title: "This website",
-    description: "My personal website",
-    image: "/assets/portfolio.webm",
-    href: "https://github.com/niyimfasha/portfolio",
+    sourceHref: "https://github.com/sefu-creater/teacher-profile",
   },
 ];
 
@@ -108,9 +194,6 @@ const services = [
 export default function Home() {
   const refScrollContainer = useRef(null);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
-  const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
-  const [current, setCurrent] = useState<number>(0);
-  const [count, setCount] = useState<number>(0);
 
   // handle scroll
   useEffect(() => {
@@ -141,7 +224,6 @@ export default function Home() {
 
         if (li.getAttribute("href") === `#${current}`) {
           li.classList.add("nav-active");
-          console.log(li.getAttribute("href"));
         }
       });
     }
@@ -152,30 +234,6 @@ export default function Home() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
-
-  useEffect(() => {
-    if (!carouselApi) return;
-
-    setCount(carouselApi.scrollSnapList().length);
-    setCurrent(carouselApi.selectedScrollSnap() + 1);
-
-    carouselApi.on("select", () => {
-      setCurrent(carouselApi.selectedScrollSnap() + 1);
-    });
-  }, [carouselApi]);
-
-  // card hover effect
-  useEffect(() => {
-    const tilt: HTMLElement[] = Array.from(document.querySelectorAll("#tilt"));
-    VanillaTilt.init(tilt, {
-      speed: 300,
-      glare: true,
-      "max-glare": 0.1,
-      gyroscope: true,
-      perspective: 900,
-      scale: 0.9,
-    });
   }, []);
 
   return (
@@ -279,40 +337,67 @@ export default function Home() {
         </section>
 
         {/* About */}
-        <section id="about" data-scroll-section>
+        <section id="about" data-scroll-section className="pt-24">
           <div
             data-scroll
             data-scroll-speed=".4"
             data-scroll-position="top"
-            className="my-14 flex max-w-6xl flex-col justify-start space-y-10"
+            className="mx-auto my-20 max-w-6xl"
           >
-            <h2 className="py-16  pb-2 text-3xl font-light leading-normal tracking-tighter text-foreground xl:text-[40px]">
-              I&apos;m an experienced full-stack developer proficient in{" "}
-              <Link
-                href="https://create.t3.gg/"
-                target="_blank"
-                className="underline"
-              >
-                TypeScript, Tailwind, and Next.js
-              </Link>{" "}
-              since 2021. My experience spans from startups to mid-sized
-              companies, where I&apos;ve been instrumental in the entire product
-              design process; from ideation and wireframing, through
-              prototyping, to the delivery of the final product, all while
-              efficiently collaborating with cross-functional teams.
+            <span className="text-gradient clash-grotesk text-sm font-semibold uppercase">
+              About Me
+            </span>
+            <div className="mt-4 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+              <div>
+                <h2 className="text-3xl font-semibold leading-tight text-foreground xl:text-5xl">
+                  I build clean, responsive web apps with strong frontend
+                  craft and practical full-stack thinking.
+                </h2>
+                <p className="mt-5 max-w-3xl text-base leading-7 text-muted-foreground xl:text-lg">
+                  My work focuses on React, TypeScript, APIs, and polished user
+                  interfaces. I enjoy turning rough ideas into usable products
+                  that feel fast, organized, and easy to understand.
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                {aboutStats.map((stat) => (
+                  <div key={stat.label} className="text-center lg:text-left">
+                    <span className="clash-grotesk text-gradient block text-4xl font-semibold xl:text-5xl">
+                      {stat.value}
+                    </span>
+                    <span className="mt-1 block text-xs leading-5 text-muted-foreground xl:text-sm">
+                      {stat.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Skills */}
+        <section id="skills" data-scroll-section className="py-16">
+          <div
+            data-scroll
+            data-scroll-speed=".4"
+            data-scroll-position="top"
+            className="mx-auto max-w-6xl"
+          >
+            <h2 className="clash-grotesk text-center text-3xl font-semibold text-foreground xl:text-4xl">
+              My Skills
             </h2>
-            <div className="grid grid-cols-2 gap-8 xl:grid-cols-3">
-              {aboutStats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="flex flex-col items-center text-center xl:items-start xl:text-start"
-                >
-                  <span className="clash-grotesk text-gradient text-4xl font-semibold tracking-tight xl:text-6xl">
-                    {stat.value}
-                  </span>
-                  <span className="tracking-tight text-muted-foreground xl:text-lg">
-                    {stat.label}
-                  </span>
+
+            <div className="mt-10 space-y-7">
+              {skillGroups.map((group) => (
+                <div key={group.title}>
+                  <div className="mb-5 bg-white px-4 py-2 text-center text-sm font-bold text-red-600">
+                    {group.title}
+                  </div>
+                  <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                    {group.skills.map((skill) => (
+                      <SkillCard key={skill.name} skill={skill} />
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
@@ -320,82 +405,18 @@ export default function Home() {
         </section>
 
         {/* Projects */}
-        <section id="projects" data-scroll-section>
-          {/* Gradient */}
-          <div className="relative isolate -z-10">
-            <div
-              className="absolute inset-x-0 -top-40 transform-gpu overflow-hidden blur-[100px] sm:-top-80 lg:-top-60"
-              aria-hidden="true"
-            >
-              <div
-                className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-primary via-primary to-secondary opacity-10 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
-                style={{
-                  clipPath:
-                    "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
-                }}
-              />
-            </div>
-          </div>
-          <div data-scroll data-scroll-speed=".4" className="my-64">
-            <span className="text-gradient clash-grotesk text-sm font-semibold tracking-tighter">
-              ✨ Projects
-            </span>
-            <h2 className="mt-3 text-4xl font-semibold tracking-tight tracking-tighter xl:text-6xl">
-              Streamlined digital experiences.
+        <section id="projects" data-scroll-section className="py-20">
+          <div
+            data-scroll
+            data-scroll-speed=".4"
+            data-scroll-position="top"
+            className="mx-auto max-w-6xl"
+          >
+            <h2 className="clash-grotesk text-center text-3xl font-semibold text-foreground xl:text-4xl">
+              My Projects
             </h2>
-            <p className="mt-1.5 text-base tracking-tight text-muted-foreground xl:text-lg">
-              I&apos;ve worked on a variety of projects, from small websites to
-              large-scale web applications. Here are some of my favorites:
-            </p>
 
-            {/* Carousel */}
-            <div className="mt-14">
-              <Carousel setApi={setCarouselApi} className="w-full">
-                <CarouselContent>
-                  {projects.map((project) => (
-                    <CarouselItem key={project.title} className="md:basis-1/2">
-                      <Card id="tilt">
-                        <CardHeader className="p-0">
-                          <Link href={project.href} target="_blank" passHref>
-                            {project.image.endsWith(".webm") ? (
-                              <video
-                                src={project.image}
-                                autoPlay
-                                loop
-                                muted
-                                className="aspect-video h-full w-full rounded-t-md bg-primary object-cover"
-                              />
-                            ) : (
-                              <Image
-                                src={project.image}
-                                alt={project.title}
-                                width={600}
-                                height={300}
-                                quality={100}
-                                className="aspect-video h-full w-full rounded-t-md bg-primary object-cover"
-                              />
-                            )}
-                          </Link>
-                        </CardHeader>
-                        <CardContent className="absolute bottom-0 w-full bg-background/50 backdrop-blur">
-                          <CardTitle className="border-t border-white/5 p-4 text-base font-normal tracking-tighter">
-                            {project.description}
-                          </CardTitle>
-                        </CardContent>
-                      </Card>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
-              <div className="py-2 text-center text-sm text-muted-foreground">
-                <span className="font-semibold">
-                  {current} / {count}
-                </span>{" "}
-                projects
-              </div>
-            </div>
+            <ProjectCarousel />
           </div>
         </section>
 
@@ -471,6 +492,317 @@ export default function Home() {
         </section>
       </div>
     </Container>
+  );
+}
+
+function ProjectCarousel() {
+  const [api, setApi] = useState<CarouselApi | null>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (!api) return;
+
+    const handleSelect = () => {
+      setActiveSlide(api.selectedScrollSnap());
+    };
+
+    handleSelect();
+    api.on("select", handleSelect);
+    api.on("reInit", handleSelect);
+
+    return () => {
+      api.off("select", handleSelect);
+      api.off("reInit", handleSelect);
+    };
+  }, [api]);
+
+  useEffect(() => {
+    if (!api || isPaused) return;
+
+    const timer = window.setInterval(() => {
+      api.scrollNext();
+    }, 3500);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [api, isPaused]);
+
+  function handleBlur(event: FocusEvent<HTMLDivElement>) {
+    if (
+      event.relatedTarget &&
+      event.currentTarget.contains(event.relatedTarget as Node)
+    ) {
+      return;
+    }
+
+    setIsPaused(false);
+  }
+
+  return (
+    <div
+      className="mt-10"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onBlur={handleBlur}
+    >
+      <Carousel setApi={setApi} opts={{ align: "start", loop: true }}>
+        <CarouselContent className="-ml-5">
+          {projects.map((project) => (
+            <CarouselItem
+              key={project.title}
+              className="basis-[88%] pl-5 sm:basis-1/2 lg:basis-1/3"
+            >
+              <ProjectCard project={project} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="-left-4 border-white/10 bg-[#131f31]/95 text-white hover:bg-[#1b2738] sm:flex" />
+        <CarouselNext className="-right-4 border-white/10 bg-[#131f31]/95 text-white hover:bg-[#1b2738] sm:flex" />
+      </Carousel>
+
+      <div className="mt-5 flex justify-center gap-2">
+        {projects.map((project, index) => (
+          <button
+            key={project.title}
+            type="button"
+            aria-label={`Show ${project.title}`}
+            onClick={() => api?.scrollTo(index)}
+            className={cn(
+              "h-2.5 w-2.5 rounded-full bg-white/25 transition",
+              activeSlide === index && "w-8 bg-[#248cff]",
+            )}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProjectCard({ project }: { project: Project }) {
+  return (
+    <article className="flex h-full min-h-[430px] flex-col rounded-md border border-white/10 bg-[#131f31] p-4 text-center shadow-md transition duration-300 hover:-translate-y-1 hover:border-primary/50">
+      <ProjectPreview project={project} />
+      <h3 className="mt-4 text-lg font-semibold text-foreground">
+        {project.title}
+      </h3>
+      <p className="mt-2 flex-1 text-sm leading-6 text-muted-foreground">
+        {project.description}
+      </p>
+      <ProjectActions project={project} />
+    </article>
+  );
+}
+
+function ProjectActions({ project }: { project: Project }) {
+  const hasProjectLinks = [project.demoHref, project.sourceHref].some(Boolean);
+
+  if (hasProjectLinks) {
+    return (
+      <div className="mt-5 flex flex-wrap justify-center gap-2">
+        {project.demoHref && (
+          <Button
+            asChild
+            size="sm"
+            className="bg-[#248cff] px-4 text-white hover:bg-[#1478e6]"
+          >
+            <Link
+              href={project.demoHref}
+              target={isExternalLink(project.demoHref) ? "_blank" : undefined}
+              rel={isExternalLink(project.demoHref) ? "noreferrer" : undefined}
+            >
+              <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+              Live Demo
+            </Link>
+          </Button>
+        )}
+        {project.sourceHref && (
+          <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="border-white/15 bg-transparent px-4 text-white hover:bg-white/10"
+          >
+            <Link
+              href={project.sourceHref}
+              target={isExternalLink(project.sourceHref) ? "_blank" : undefined}
+              rel={isExternalLink(project.sourceHref) ? "noreferrer" : undefined}
+            >
+              <Github className="mr-1.5 h-3.5 w-3.5" />
+              Source Code
+            </Link>
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  const isExternal = isExternalLink(project.href);
+
+  return (
+    <Button
+      asChild
+      size="sm"
+      className="mx-auto mt-5 bg-[#248cff] px-5 text-white hover:bg-[#1478e6]"
+    >
+      <Link
+        href={project.href}
+        target={isExternal ? "_blank" : undefined}
+        rel={isExternal ? "noreferrer" : undefined}
+      >
+        {project.actionLabel ?? "View Project"}
+      </Link>
+    </Button>
+  );
+}
+
+function isExternalLink(href: string) {
+  return href.startsWith("http");
+}
+
+function SkillCard({ skill }: { skill: Skill }) {
+  return (
+    <article className="rounded-md border border-white/5 bg-[#1b2738] p-5 shadow-md">
+      <div className="flex items-center gap-3">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[#248cff]/20 text-[11px] font-bold text-[#248cff]">
+          {skill.icon}
+        </span>
+        <h3 className="text-sm font-bold text-slate-100">{skill.name}</h3>
+      </div>
+      <p className="mt-4 text-xs text-slate-300">Level: {skill.level}</p>
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-700">
+        <div
+          className="h-full rounded-full bg-[#248cff]"
+          style={{ width: `${skill.progress}%` }}
+        />
+      </div>
+    </article>
+  );
+}
+
+function ProjectPreview({ project }: { project: Project }) {
+  if (project.mockup === "resume") {
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-md border border-white/10 bg-slate-100 p-4 text-left text-slate-900">
+        <ProjectBadge text={project.badge} />
+        <p className="text-2xl font-black leading-6 text-[#248cff]">
+          Stand Out
+        </p>
+        <p className="mt-1 text-xl font-black leading-5">
+          with Professional Resumes
+        </p>
+        <p className="mt-3 max-w-[85%] text-[10px] leading-4 text-slate-500">
+          Craft the perfect resume with elegant templates, live preview, and
+          export-ready controls.
+        </p>
+      </div>
+    );
+  }
+
+  if (project.mockup === "java") {
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-md border border-white/10 bg-[#09111f] p-4 text-left">
+        <ProjectBadge text={project.badge} />
+        <div className="mb-4 flex items-center gap-2">
+          <span className="h-3 w-3 rounded-full bg-red-400" />
+          <span className="h-3 w-3 rounded-full bg-yellow-400" />
+          <span className="h-3 w-3 rounded-full bg-green-400" />
+        </div>
+        <p className="font-mono text-[11px] leading-5 text-slate-300">
+          <span className="text-[#248cff]">public class</span>{" "}
+          ServletApp {"{"}
+        </p>
+        <p className="pl-4 font-mono text-[11px] leading-5 text-slate-300">
+          doGet(request, response);
+        </p>
+        <p className="font-mono text-[11px] leading-5 text-slate-300">{"}"}</p>
+      </div>
+    );
+  }
+
+  if (project.mockup === "sales") {
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-md border border-white/10 bg-slate-100 p-4 text-left text-slate-900">
+        <ProjectBadge text={project.badge} />
+        <div className="flex items-center justify-between">
+          <p className="text-lg font-black text-[#248cff]">Sales Orders</p>
+          <span className="rounded bg-green-100 px-2 py-1 text-[10px] font-bold text-green-700">
+            Paid
+          </span>
+        </div>
+        <div className="mt-4 space-y-2">
+          {["Customer", "Product", "Quantity"].map((item) => (
+            <div key={item} className="flex items-center justify-between rounded bg-white px-3 py-2 text-[11px] shadow-sm">
+              <span>{item}</span>
+              <span className="h-2 w-16 rounded-full bg-slate-200" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (project.mockup === "teacher") {
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-md border border-white/10 bg-[#0d1829] p-4 text-left">
+        <ProjectBadge text={project.badge} />
+        <p className="text-lg font-black text-white">Teacher Profiles</p>
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {["Math", "Science", "English"].map((subject) => (
+            <div key={subject} className="rounded bg-white/10 p-2">
+              <span className="block h-8 w-8 rounded-full bg-[#248cff]/80" />
+              <p className="mt-2 text-[10px] font-semibold text-white">
+                {subject}
+              </p>
+              <span className="mt-1 block h-1.5 rounded-full bg-white/20" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (project.media?.endsWith(".webm")) {
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-md bg-[#0b1423]">
+        <ProjectBadge text={project.badge} />
+        <video
+          src={project.media}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="h-full w-full object-cover"
+        />
+      </div>
+    );
+  }
+
+  if (project.media) {
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-md bg-[#0b1423]">
+        <ProjectBadge text={project.badge} />
+        <Image
+          src={project.media}
+          alt={project.title}
+          width={640}
+          height={360}
+          className="h-full w-full object-cover"
+        />
+      </div>
+    );
+  }
+
+  return null;
+}
+
+function ProjectBadge({ text }: { text: string }) {
+  return (
+    <span className="absolute right-2 top-2 z-10 rounded bg-[#248cff] px-2 py-1 text-[10px] font-semibold text-white">
+      {text}
+    </span>
   );
 }
 
